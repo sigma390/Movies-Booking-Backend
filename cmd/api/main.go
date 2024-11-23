@@ -20,8 +20,9 @@ func main() {
 	//connect to DB
 	app.Domain = "example.com"
 	log.Println("Starting Apllication on Port ",port);
+	// http.HandleFunc("/", Hello); old way Default mux 
 	//start a Web Server
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port),nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port),app.routes())
 	if err != nil{
 		log.Fatal(err);
 	}
