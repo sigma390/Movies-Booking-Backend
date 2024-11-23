@@ -14,5 +14,7 @@ import (
 	//add Middlewares here 
 	mux.Use(middleware.Recoverer);
 	mux.Get("/", app.Home);
+	//get All Movies
+	mux.Get("/movies", app.AllMovies);
 	return mux;
 }
