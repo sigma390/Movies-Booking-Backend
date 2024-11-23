@@ -13,6 +13,7 @@ import (
 	mux:=chi.NewRouter();
 	//add Middlewares here 
 	mux.Use(middleware.Recoverer);
+	mux.Use(app.enableCors);
 	mux.Get("/", app.Home);
 	//get All Movies
 	mux.Get("/movies", app.AllMovies);
