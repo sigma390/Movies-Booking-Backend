@@ -1,7 +1,8 @@
 package main
 
 import (
-	"database/sql"
+	"backend/internal/repository"
+	"backend/internal/repository/dbrepo"
 	"flag"
 	"fmt"
 	"log"
@@ -13,7 +14,9 @@ const port = 8080
 type application struct {
 	Domain string
 	DSN string //data Source Name
-	DB *sql.DB
+	//=> Old <==
+	// DB *sql.DB //Pool of databases
+	DB repository.DatabaseRepo
 }
 
 func main() {
@@ -28,9 +31,13 @@ func main() {
 	if err!=nil{
         log.Fatal(err);
     }
-	app.DB = conn;
+	//Old WAY
+	// app.DB = conn; //this is Basically Returning A pool of database
+	//Before Existing We Must Close Connection else , its A respource Leak
+	// defer app.DB.Close(); //defer means Execute All under this , but before  This line Content Differ
 
-
+	//new Way 
+	app.DB = &dbrepo.PostgresDBRepo{DB: conn}
 	app.Domain = "example.com"
 	log.Println("Starting Apllication on Port ",port);
 	// http.HandleFunc("/", Hello); old way Default mux 
