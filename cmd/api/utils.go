@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 )
 
@@ -51,3 +53,41 @@ func (app *application) writeJSON(w http.ResponseWriter, statusCode int, data in
 	// Return nil to indicate success
 	return nil
 }
+
+
+//==============> Read JSON function <==============
+
+func (app *application) readJSON(w http.ResponseWriter, r *http.Request, data interface{}) error {
+    // Step 1: Limit the size of the JSON body
+    maxBytes := 1024 * 1024 // Allow a maximum JSON size of 1MB
+    r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+    // Step 2: Create a JSON decoder for the request body
+    dec := json.NewDecoder(r.Body)
+
+    // Step 3: Disallow unknown fields
+    // This ensures that if the incoming JSON contains fields that are not mapped to the target struct,
+    // an error is thrown. This helps enforce strict validation.
+    dec.DisallowUnknownFields()
+
+    // Step 4: Decode the JSON body into the target `data` struct
+    err := dec.Decode(data)
+    if err != nil {
+        // Return the error if decoding fails (e.g., invalid JSON format, type mismatch)
+        return err
+    }
+
+    // Step 5: Ensure the JSON body contains only one object
+    // Attempt to decode again. If additional JSON data exists in the body,
+    // this indicates that the body contains multiple JSON objects, which is not allowed.
+    err = dec.Decode(&struct{}{}) // Decode into an empty struct to check for extra data
+    if err != io.EOF {
+        // If the error is not `io.EOF`, it means there is extra data beyond the first JSON object
+        return errors.New("body must contain a single JSON object")
+    }
+
+    // Step 6: Return nil to indicate successful decoding
+    return nil
+}
+
+//==================> Error JSON <=====================
