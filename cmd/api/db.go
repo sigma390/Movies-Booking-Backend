@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4"
@@ -28,5 +29,6 @@ func (app *application) connectToDB()(*sql.DB,error){
 	if err!=nil{
 		return nil,err;
 	}
+	log.Println("Connected To Postgres !!")
 	return connection,nil;
 }
